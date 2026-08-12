@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+          targets: wasm32-unknown-unknown
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all --check
+      - run: cargo clippy -p forum-core --all-targets -- -D warnings
+      - run: cargo test -p forum-core
+      - run: cargo install worker-build --version 0.8.1 --locked
+      - run: worker-build --release
+        working-directory: apps/worker
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm install
+      - run: npx wrangler types
+      - run: npx wrangler deploy --dry-run --outdir dist

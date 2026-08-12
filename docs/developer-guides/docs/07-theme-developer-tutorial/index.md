@@ -1,3 +1,0 @@
----
-title: "Theme Dev Tutorial"
----

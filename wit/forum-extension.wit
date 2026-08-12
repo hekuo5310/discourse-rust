@@ -1,0 +1,20 @@
+package forum:extension@0.1.0;
+
+interface processor {
+  record context {
+    request-id: string,
+    actor-id: option<string>,
+  }
+
+  record text-result {
+    value: string,
+    warnings: list<string>,
+  }
+
+  process-text: func(ctx: context, value: string) -> result<text-result, string>;
+}
+
+world forum-extension {
+  export processor;
+}
+

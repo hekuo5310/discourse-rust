@@ -1,3 +1,0 @@
-email,groups,topic_id,admin,moderator,trust_level
-test@example.com,discourse,,true,true,4
-test2@example.com,,,true,,4

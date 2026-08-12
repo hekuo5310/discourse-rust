@@ -1,0 +1,16 @@
+[package]
+name = "forum-worker"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+forum-core = { path = "../../crates/core" }
+serde.workspace = true
+serde_json.workspace = true
+wasm-bindgen.workspace = true
+worker.workspace = true
+

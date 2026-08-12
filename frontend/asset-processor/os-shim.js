@@ -1,3 +1,0 @@
-export function cpus() {
-  return [{}];
-}
