@@ -2,7 +2,7 @@ FROM rust:1.97-slim-bookworm AS builder
 
 WORKDIR /source
 COPY . .
-RUN cargo build --release -p forum-native
+RUN cargo build --locked --release -p forum-native
 
 FROM debian:bookworm-slim
 

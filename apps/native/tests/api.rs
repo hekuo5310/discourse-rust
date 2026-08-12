@@ -18,7 +18,10 @@ async fn complete_forum_flow() {
     let state = AppState::connect(&database_url, &redis_url)
         .await
         .expect("test services must be reachable");
-    state.reset_for_test().await.expect("test data should reset");
+    state
+        .reset_for_test()
+        .await
+        .expect("test data should reset");
     let app = router(state);
 
     let (status, session): (_, SessionResponse) = request_json(
@@ -113,7 +116,11 @@ async fn request_json<T: DeserializeOwned, B: Serialize + ?Sized>(
     body: Option<&B>,
 ) -> (StatusCode, T) {
     let request = build_request(method, uri, token, body);
-    let response = app.clone().oneshot(request).await.expect("request succeeds");
+    let response = app
+        .clone()
+        .oneshot(request)
+        .await
+        .expect("request succeeds");
     let status = response.status();
     let bytes = response
         .into_body()
@@ -125,12 +132,7 @@ async fn request_json<T: DeserializeOwned, B: Serialize + ?Sized>(
     (status, decoded)
 }
 
-async fn request_empty(
-    app: &Router,
-    method: Method,
-    uri: &str,
-    token: Option<&str>,
-) -> StatusCode {
+async fn request_empty(app: &Router, method: Method, uri: &str, token: Option<&str>) -> StatusCode {
     app.clone()
         .oneshot(build_request(
             method,

@@ -1,8 +1,8 @@
 use forum_core::{
     hash_password, new_id, new_session_token, normalize_email, normalize_slug, normalize_username,
     token_digest, validate_body, validate_title, verify_password, ApiError, Category,
-    CategoryInput, LoginInput, Post, PostInput, RegisterInput, SessionResponse, Topic, TopicDetail,
-    TopicInput, User,
+    CategoryInput, IdResponse, ListResponse, LoginInput, Post, PostInput, RegisterInput,
+    SessionResponse, Topic, TopicDetail, TopicInput, User,
 };
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
@@ -30,16 +30,6 @@ impl UserWithPassword {
             created_at: self.created_at.clone(),
         }
     }
-}
-
-#[derive(Debug, Serialize)]
-struct IdResponse {
-    id: String,
-}
-
-#[derive(Debug, Serialize)]
-struct ListResponse<T> {
-    items: Vec<T>,
 }
 
 fn json<T: Serialize>(value: &T, status: u16) -> Result<Response> {

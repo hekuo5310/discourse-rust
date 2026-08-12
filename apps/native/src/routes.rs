@@ -36,7 +36,10 @@ pub fn router(state: AppState) -> Router {
         .route("/api/v1/auth/login", post(login))
         .route("/api/v1/auth/logout", post(logout))
         .route("/api/v1/me", get(me))
-        .route("/api/v1/categories", get(list_categories).post(create_category))
+        .route(
+            "/api/v1/categories",
+            get(list_categories).post(create_category),
+        )
         .route("/api/v1/topics", get(list_topics).post(create_topic))
         .route("/api/v1/topics/{id}", get(topic_detail))
         .route("/api/v1/topics/{id}/posts", post(create_post))
@@ -88,7 +91,7 @@ async fn current_user(state: &AppState, headers: &HeaderMap) -> ApiResult<Option
     // session revocation and expiration.
     let mut cache = state.cache.clone();
     if let Err(error) = cache
-        .get(&format!("session:{digest}"))
+        .get(format!("session:{digest}"))
         .await
         .map(|_: Option<String>| ())
     {
@@ -129,7 +132,11 @@ async fn create_session(state: &AppState, user: User) -> ApiResult<SessionRespon
 
     let mut cache = state.cache.clone();
     if let Err(error) = cache
-        .set_ex(format!("session:{digest}"), user.id.clone(), SESSION_TTL_SECONDS)
+        .set_ex(
+            format!("session:{digest}"),
+            user.id.clone(),
+            SESSION_TTL_SECONDS,
+        )
         .await
     {
         tracing::warn!(%error, "Redis session hint write failed");
@@ -145,8 +152,8 @@ async fn register(
     let input = payload(payload_result)?;
     let username = normalize_username(&input.username)
         .map_err(|_| ApiError::unprocessable("invalid username"))?;
-    let email = normalize_email(&input.email)
-        .map_err(|_| ApiError::unprocessable("invalid email"))?;
+    let email =
+        normalize_email(&input.email).map_err(|_| ApiError::unprocessable("invalid email"))?;
     let password_hash = hash_password(&input.password)
         .map_err(|_| ApiError::unprocessable("password must contain 12 to 256 bytes"))?;
 
@@ -181,7 +188,10 @@ async fn register(
     };
     transaction.commit().await.map_err(ApiError::internal)?;
 
-    Ok((StatusCode::CREATED, Json(create_session(&state, user).await?)))
+    Ok((
+        StatusCode::CREATED,
+        Json(create_session(&state, user).await?),
+    ))
 }
 
 async fn login(
@@ -206,12 +216,9 @@ async fn login(
     Ok(Json(create_session(&state, user.public()).await?))
 }
 
-async fn logout(
-    State(state): State<AppState>,
-    headers: HeaderMap,
-) -> ApiResult<impl IntoResponse> {
-    let token = bearer(&headers)
-        .ok_or_else(|| ApiError::unauthorized("authentication required"))?;
+async fn logout(State(state): State<AppState>, headers: HeaderMap) -> ApiResult<impl IntoResponse> {
+    let token =
+        bearer(&headers).ok_or_else(|| ApiError::unauthorized("authentication required"))?;
     let digest = token_digest(&token);
     sqlx::query("DELETE FROM sessions WHERE token_hash = $1")
         .bind(&digest)
@@ -230,9 +237,7 @@ async fn me(State(state): State<AppState>, headers: HeaderMap) -> ApiResult<Json
     Ok(Json(require_user(&state, &headers).await?))
 }
 
-async fn list_categories(
-    State(state): State<AppState>,
-) -> ApiResult<Json<ListResponse<Category>>> {
+async fn list_categories(State(state): State<AppState>) -> ApiResult<Json<ListResponse<Category>>> {
     let items = sqlx::query_as::<_, CategoryRow>(
         "SELECT id, name, slug, created_at FROM categories ORDER BY name",
     )
@@ -262,20 +267,16 @@ async fn create_category(
     let slug = normalize_slug(&input.slug)
         .map_err(|_| ApiError::unprocessable("invalid category slug"))?;
     let id = Uuid::new_v4();
-    let result = sqlx::query(
-        "INSERT INTO categories (id, name, slug, creator_id) VALUES ($1, $2, $3, $4)",
-    )
-    .bind(id)
-    .bind(name)
-    .bind(slug)
-    .bind(parse_id(&user.id, "user not found")?)
-    .execute(&state.db)
-    .await;
+    let result =
+        sqlx::query("INSERT INTO categories (id, name, slug, creator_id) VALUES ($1, $2, $3, $4)")
+            .bind(id)
+            .bind(name)
+            .bind(slug)
+            .bind(parse_id(&user.id, "user not found")?)
+            .execute(&state.db)
+            .await;
     match result {
-        Ok(_) => Ok((
-            StatusCode::CREATED,
-            Json(IdResponse { id: id.to_string() }),
-        )),
+        Ok(_) => Ok((StatusCode::CREATED, Json(IdResponse { id: id.to_string() }))),
         Err(error) if unique_violation(&error) => {
             Err(ApiError::conflict("category slug already exists"))
         }
@@ -307,18 +308,16 @@ async fn create_topic(
 ) -> ApiResult<impl IntoResponse> {
     let user = require_user(&state, &headers).await?;
     let input = payload(payload_result)?;
-    let title = validate_title(&input.title)
-        .map_err(|_| ApiError::unprocessable("invalid title"))?;
-    let body = validate_body(&input.body)
-        .map_err(|_| ApiError::unprocessable("invalid body"))?;
+    let title =
+        validate_title(&input.title).map_err(|_| ApiError::unprocessable("invalid title"))?;
+    let body = validate_body(&input.body).map_err(|_| ApiError::unprocessable("invalid body"))?;
     let category_id = parse_id(&input.category_id, "category not found")?;
-    let category_exists = sqlx::query_scalar::<_, bool>(
-        "SELECT EXISTS (SELECT 1 FROM categories WHERE id = $1)",
-    )
-    .bind(category_id)
-    .fetch_one(&state.db)
-    .await
-    .map_err(ApiError::internal)?;
+    let category_exists =
+        sqlx::query_scalar::<_, bool>("SELECT EXISTS (SELECT 1 FROM categories WHERE id = $1)")
+            .bind(category_id)
+            .fetch_one(&state.db)
+            .await
+            .map_err(ApiError::internal)?;
     if !category_exists {
         return Err(ApiError::not_found("category not found"));
     }
@@ -326,16 +325,14 @@ async fn create_topic(
     let topic_id = Uuid::new_v4();
     let author_id = parse_id(&user.id, "user not found")?;
     let mut transaction = state.db.begin().await.map_err(ApiError::internal)?;
-    sqlx::query(
-        "INSERT INTO topics (id, category_id, author_id, title) VALUES ($1, $2, $3, $4)",
-    )
-    .bind(topic_id)
-    .bind(category_id)
-    .bind(author_id)
-    .bind(title)
-    .execute(&mut *transaction)
-    .await
-    .map_err(ApiError::internal)?;
+    sqlx::query("INSERT INTO topics (id, category_id, author_id, title) VALUES ($1, $2, $3, $4)")
+        .bind(topic_id)
+        .bind(category_id)
+        .bind(author_id)
+        .bind(title)
+        .execute(&mut *transaction)
+        .await
+        .map_err(ApiError::internal)?;
     sqlx::query(
         "INSERT INTO posts (id, topic_id, author_id, body, position) VALUES ($1, $2, $3, $4, 1)",
     )
@@ -398,16 +395,16 @@ async fn create_post(
     let user = require_user(&state, &headers).await?;
     let topic_id = parse_id(&id, "topic not found")?;
     let input = payload(payload_result)?;
-    let body = validate_body(&input.body)
-        .map_err(|_| ApiError::unprocessable("invalid body"))?;
+    let body = validate_body(&input.body).map_err(|_| ApiError::unprocessable("invalid body"))?;
 
     let mut transaction = state.db.begin().await.map_err(ApiError::internal)?;
-    let topic_exists = sqlx::query_scalar::<_, Uuid>("SELECT id FROM topics WHERE id = $1 FOR UPDATE")
-        .bind(topic_id)
-        .fetch_optional(&mut *transaction)
-        .await
-        .map_err(ApiError::internal)?
-        .is_some();
+    let topic_exists =
+        sqlx::query_scalar::<_, Uuid>("SELECT id FROM topics WHERE id = $1 FOR UPDATE")
+            .bind(topic_id)
+            .fetch_optional(&mut *transaction)
+            .await
+            .map_err(ApiError::internal)?
+            .is_some();
     if !topic_exists {
         return Err(ApiError::not_found("topic not found"));
     }

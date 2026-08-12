@@ -23,8 +23,8 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
       - run: cargo fmt --all --check
-      - run: cargo clippy -p forum-core --all-targets -- -D warnings
-      - run: cargo test -p forum-core
+      - run: cargo clippy --locked -p forum-core --all-targets -- -D warnings
+      - run: cargo test --locked -p forum-core
       - run: cargo install worker-build --version 0.8.1 --locked
       - run: worker-build --release
         working-directory: apps/worker
@@ -70,5 +70,5 @@ jobs:
         with:
           components: clippy
       - uses: Swatinem/rust-cache@v2
-      - run: cargo clippy -p forum-native --all-targets -- -D warnings
-      - run: cargo test -p forum-native --test api -- --test-threads=1
+      - run: cargo clippy --locked -p forum-native --all-targets -- -D warnings
+      - run: cargo test --locked -p forum-native --test api -- --test-threads=1
