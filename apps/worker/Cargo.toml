@@ -2,6 +2,7 @@
 name = "forum-worker"
 version.workspace = true
 edition.workspace = true
+license.workspace = true
 rust-version.workspace = true
 
 [lib]
@@ -13,4 +14,3 @@ serde.workspace = true
 serde_json.workspace = true
 wasm-bindgen.workspace = true
 worker.workspace = true
-
