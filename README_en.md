@@ -20,6 +20,8 @@ This project is licensed under the [Apache2.0](LICENSE).
 - D1-backed users, sessions, categories, topics, and posts.
 - KV session hints with D1 as the authoritative revocation source.
 - Registration, login, logout, current-user, category, topic, and reply APIs.
+- Responsive Workers Static Assets frontend for authentication, category browsing,
+  topic creation, and replies.
 - Native Rust HTTP runtime backed by PostgreSQL and Redis.
 - Embedded PostgreSQL migrations and a container-based local stack.
 - A WIT boundary for optional modules written in Rust, Go, C, C++, C#, Python,

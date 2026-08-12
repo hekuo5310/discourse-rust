@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <meta name="description" content="Forum Engine 社区讨论平台">
+    <title>Forum Engine</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#/" aria-label="返回首页">Forum Engine</a>
+        <nav class="main-nav" aria-label="主导航">
+          <a href="#/" data-nav="home">最新主题</a>
+          <button class="link-button" id="categories-button" type="button">分类</button>
+        </nav>
+        <div class="header-actions">
+          <button class="button button-secondary" id="login-button" type="button">登录</button>
+          <button class="button" id="register-button" type="button">注册</button>
+          <button class="user-button hidden" id="user-button" type="button" aria-haspopup="menu"></button>
+          <div class="user-menu hidden" id="user-menu" role="menu">
+            <div class="user-menu-summary" id="user-summary"></div>
+            <button id="logout-button" type="button" role="menuitem">退出登录</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <div class="notice hidden" id="notice" role="status"></div>
+
+      <section id="home-view">
+        <div class="page-heading">
+          <div>
+            <p class="eyebrow">社区讨论</p>
+            <h1>最新主题</h1>
+            <p class="heading-copy">浏览社区中的最新讨论，或登录后发起一个新主题。</p>
+          </div>
+          <button class="button" id="new-topic-button" type="button">发布主题</button>
+        </div>
+
+        <div class="content-grid">
+          <aside class="sidebar" id="category-sidebar">
+            <div class="section-title-row">
+              <h2>分类</h2>
+              <button class="text-button hidden" id="new-category-button" type="button">新建</button>
+            </div>
+            <button class="category-item active" data-category="all" type="button">
+              <span>全部主题</span>
+              <span id="all-topic-count">0</span>
+            </button>
+            <div id="category-list"></div>
+          </aside>
+
+          <section class="topic-panel" aria-labelledby="topic-list-title">
+            <div class="topic-toolbar">
+              <h2 id="topic-list-title">全部主题</h2>
+              <label class="search-field">
+                <span class="sr-only">搜索主题</span>
+                <input id="topic-search" type="search" placeholder="搜索标题或作者" autocomplete="off">
+              </label>
+            </div>
+            <div class="loading-list" id="topic-loading" aria-label="正在加载主题">
+              <div></div><div></div><div></div>
+            </div>
+            <div class="topic-list hidden" id="topic-list"></div>
+            <div class="empty-state hidden" id="topic-empty">
+              <h3>这里还没有主题</h3>
+              <p>登录后发布第一个主题，开始讨论。</p>
+            </div>
+          </section>
+        </div>
+      </section>
+
+      <section class="hidden" id="topic-view">
+        <button class="back-button" id="back-button" type="button">返回主题列表</button>
+        <div class="topic-header">
+          <div>
+            <p class="eyebrow" id="topic-category">主题</p>
+            <h1 id="topic-title"></h1>
+            <p class="topic-meta" id="topic-meta"></p>
+          </div>
+        </div>
+        <div class="post-list" id="post-list"></div>
+        <section class="composer" id="reply-composer">
+          <h2>回复主题</h2>
+          <form id="reply-form">
+            <label for="reply-body">内容</label>
+            <textarea id="reply-body" name="body" rows="7" maxlength="100000" required placeholder="写下你的回复"></textarea>
+            <div class="form-footer">
+              <p id="reply-hint">登录后可以参与讨论。</p>
+              <button class="button" type="submit">发布回复</button>
+            </div>
+          </form>
+        </section>
+      </section>
+    </main>
+
+    <dialog id="auth-dialog">
+      <form class="dialog-card" id="auth-form">
+        <div class="dialog-heading">
+          <div>
+            <p class="eyebrow" id="auth-eyebrow">欢迎回来</p>
+            <h2 id="auth-title">登录</h2>
+          </div>
+          <button class="close-button" type="button" data-close-dialog aria-label="关闭">×</button>
+        </div>
+        <div class="form-stack">
+          <label class="register-only hidden" for="auth-username">用户名</label>
+          <input class="register-only hidden" id="auth-username" name="username" autocomplete="username" minlength="3" maxlength="32">
+          <label id="auth-login-label" for="auth-login">用户名或邮箱</label>
+          <input id="auth-login" name="login" autocomplete="username" required>
+          <label class="register-only hidden" for="auth-email">邮箱</label>
+          <input class="register-only hidden" id="auth-email" name="email" type="email" autocomplete="email">
+          <label for="auth-password">密码</label>
+          <input id="auth-password" name="password" type="password" autocomplete="current-password" minlength="12" maxlength="256" required>
+          <p class="form-error hidden" id="auth-error" role="alert"></p>
+          <button class="button button-wide" id="auth-submit" type="submit">登录</button>
+        </div>
+        <p class="dialog-switch" id="auth-switch-copy">
+          还没有账户？ <button class="text-button" id="auth-switch" type="button">注册</button>
+        </p>
+      </form>
+    </dialog>
+
+    <dialog id="topic-dialog">
+      <form class="dialog-card dialog-card-wide" id="topic-form">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">新讨论</p><h2>发布主题</h2></div>
+          <button class="close-button" type="button" data-close-dialog aria-label="关闭">×</button>
+        </div>
+        <div class="form-stack">
+          <label for="topic-category-input">分类</label>
+          <select id="topic-category-input" name="category_id" required></select>
+          <label for="topic-title-input">标题</label>
+          <input id="topic-title-input" name="title" minlength="3" maxlength="200" required placeholder="用一句话概括讨论内容">
+          <label for="topic-body-input">正文</label>
+          <textarea id="topic-body-input" name="body" rows="10" maxlength="100000" required placeholder="详细说明你想讨论的内容"></textarea>
+          <p class="form-error hidden" id="topic-error" role="alert"></p>
+          <button class="button button-wide" type="submit">发布主题</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="category-dialog">
+      <form class="dialog-card" id="category-form">
+        <div class="dialog-heading">
+          <div><p class="eyebrow">管理功能</p><h2>新建分类</h2></div>
+          <button class="close-button" type="button" data-close-dialog aria-label="关闭">×</button>
+        </div>
+        <div class="form-stack">
+          <label for="category-name">分类名称</label>
+          <input id="category-name" name="name" minlength="2" maxlength="80" required placeholder="例如：站务讨论">
+          <label for="category-slug">英文标识</label>
+          <input id="category-slug" name="slug" pattern="[a-z0-9-]+" required placeholder="例如：site-feedback">
+          <p class="form-error hidden" id="category-error" role="alert"></p>
+          <button class="button button-wide" type="submit">创建分类</button>
+        </div>
+      </form>
+    </dialog>
+
+    <div class="toast hidden" id="toast" role="status"></div>
+  </body>
+</html>
