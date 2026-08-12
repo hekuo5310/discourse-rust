@@ -5,20 +5,18 @@
   "compatibility_date": "2026-08-12",
   "compatibility_flags": ["nodejs_compat"],
   "build": {
-    "command": "cd apps/worker && worker-build --release"
+    "command": "cargo install -q \"worker-build@^0.8\" && cd apps/worker && worker-build --release"
   },
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "forum-engine-db",
-      "database_id": "00000000-0000-0000-0000-000000000000",
       "migrations_dir": "migrations/d1"
     }
   ],
   "kv_namespaces": [
     {
-      "binding": "CACHE",
-      "id": "00000000000000000000000000000000"
+      "binding": "CACHE"
     }
   ],
   "observability": {

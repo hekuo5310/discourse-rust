@@ -2,6 +2,8 @@
 
 [English](README_en.md)
 
+[![一键部署到 Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hekuo5310/discourse-rust)
+
 一个以 Rust 为主要实现语言、通过 clean-room 方式独立开发的社区讨论平台。
 
 本仓库当前代码树不包含或改写此前项目的源代码、测试、素材或文案。临时名称
@@ -23,20 +25,32 @@
 
 Rust 始终是主要实现语言。只有在确有收益时，其他语言才通过带版本的组件边界接入。
 
-## Workers 快速开始
+## 一键部署到 Cloudflare Workers
 
-1. 创建一个 D1 数据库和一个 KV 命名空间。
-2. 替换 `wrangler.jsonc` 中的占位 ID。
-3. 应用 D1 迁移：
+点击上方按钮后，Cloudflare 会复制本仓库、根据 `wrangler.jsonc` 自动创建 D1
+数据库和 KV 命名空间、执行 D1 迁移、构建 Rust WebAssembly Worker，并配置
+Workers Builds 以便后续提交自动部署。
 
-   ```sh
-   npx wrangler d1 migrations apply forum-engine-db --local
-   ```
+一键部署使用 Workers + D1 + KV。原有 PostgreSQL + Redis 部署选项仍由下方的
+原生运行时提供。
 
-4. 启动 Worker：
+## Workers 本地开发
+
+1. 安装 JavaScript 工具：
 
    ```sh
    npm install
+   ```
+
+2. 应用本地 D1 迁移：
+
+   ```sh
+   npm run migrate:local
+   ```
+
+3. 启动 Worker：
+
+   ```sh
    npm run dev
    ```
 

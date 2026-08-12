@@ -2,6 +2,8 @@
 
 [中文](README.md)
 
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hekuo5310/discourse-rust)
+
 An independent, clean-room community platform written primarily in Rust.
 
 The current tree does not contain or adapt source code, tests, assets, or prose
@@ -26,20 +28,33 @@ This project is licensed under the [Apache2.0](LICENSE).
 Rust remains the primary implementation language. Other languages are accepted
 only behind a versioned component boundary when they provide a concrete benefit.
 
-## Workers quick start
+## Deploy to Cloudflare Workers
 
-1. Create a D1 database and KV namespace.
-2. Replace the placeholder IDs in `wrangler.jsonc`.
-3. Apply the D1 migration:
+Click the button above to copy this repository into your account. Cloudflare
+will use `wrangler.jsonc` to provision D1 and KV automatically, apply the D1
+migrations, build the Rust WebAssembly Worker, and configure Workers Builds for
+automatic deployments from later commits.
 
-   ```sh
-   npx wrangler d1 migrations apply forum-engine-db --local
-   ```
+The one-click path uses Workers + D1 + KV. The original PostgreSQL + Redis
+option remains available through the native runtime below.
 
-4. Start the Worker:
+## Local Workers development
+
+1. Install the JavaScript tooling:
 
    ```sh
    npm install
+   ```
+
+2. Apply the local D1 migrations:
+
+   ```sh
+   npm run migrate:local
+   ```
+
+3. Start the Worker:
+
+   ```sh
    npm run dev
    ```
 

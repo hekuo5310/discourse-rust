@@ -3,10 +3,11 @@
   "license": "GPL-2.0-only",
   "private": true,
   "scripts": {
-    "build": "wrangler deploy --dry-run --outdir dist",
+    "check": "wrangler deploy --dry-run --outdir dist",
     "dev": "wrangler dev",
-    "deploy": "wrangler deploy",
-    "migrate:local": "wrangler d1 migrations apply forum-engine-db --local",
+    "deploy": "npm run migrate:remote && wrangler deploy",
+    "migrate:local": "wrangler d1 migrations apply DB --local",
+    "migrate:remote": "wrangler d1 migrations apply DB --remote",
     "types": "wrangler types"
   },
   "devDependencies": {
