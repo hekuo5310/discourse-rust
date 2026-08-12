@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  rust:
+  worker:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -31,3 +31,40 @@ jobs:
       - run: npm install
       - run: npx wrangler types
       - run: npx wrangler deploy --dry-run --outdir dist
+
+  native:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: forum
+          POSTGRES_PASSWORD: forum
+          POSTGRES_USER: forum
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U forum -d forum"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+      redis:
+        image: redis:8-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    env:
+      DATABASE_URL: postgres://forum:forum@localhost:5432/forum
+      REDIS_URL: redis://localhost:6379
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo clippy -p forum-native --all-targets -- -D warnings
+      - run: cargo test -p forum-native --test api -- --test-threads=1

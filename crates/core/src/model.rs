@@ -41,44 +41,44 @@ pub struct Post {
     pub updated_at: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct RegisterInput {
     pub username: String,
     pub email: String,
     pub password: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct LoginInput {
     pub login: String,
     pub password: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct CategoryInput {
     pub name: String,
     pub slug: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TopicInput {
     pub category_id: String,
     pub title: String,
     pub body: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct PostInput {
     pub body: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct SessionResponse {
     pub token: String,
     pub user: User,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct TopicDetail {
     pub topic: Topic,
     pub posts: Vec<Post>,
@@ -87,4 +87,14 @@ pub struct TopicDetail {
 #[derive(Debug, Serialize)]
 pub struct ApiError<'a> {
     pub error: &'a str,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IdResponse {
+    pub id: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ListResponse<T> {
+    pub items: Vec<T>,
 }
