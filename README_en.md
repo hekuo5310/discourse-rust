@@ -9,7 +9,7 @@ from the project that previously occupied this repository. Its old commits
 remain in Git history. The temporary name “Forum Engine” is intentionally
 neutral and may be replaced.
 
-This project is licensed under the [GNU GPL v2](LICENSE).
+This project is licensed under the [Apache2.0](LICENSE).
 
 ## Implemented
 
