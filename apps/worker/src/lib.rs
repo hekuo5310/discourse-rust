@@ -1,8 +1,8 @@
 use forum_core::{
-    hash_password, new_id, new_session_token, normalize_email, normalize_slug,
-    normalize_username, token_digest, validate_body, validate_title, verify_password, ApiError,
-    Category, CategoryInput, LoginInput, Post, PostInput, RegisterInput, SessionResponse, Topic,
-    TopicDetail, TopicInput, User,
+    hash_password, new_id, new_session_token, normalize_email, normalize_slug, normalize_username,
+    token_digest, validate_body, validate_title, verify_password, ApiError, Category,
+    CategoryInput, LoginInput, Post, PostInput, RegisterInput, SessionResponse, Topic, TopicDetail,
+    TopicInput, User,
 };
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::JsValue;
@@ -51,7 +51,10 @@ fn api_error(message: &'static str, status: u16) -> Result<Response> {
 }
 
 fn binding_values(values: &[&str]) -> Vec<JsValue> {
-    values.iter().map(|value| JsValue::from_str(value)).collect()
+    values
+        .iter()
+        .map(|value| JsValue::from_str(value))
+        .collect()
 }
 
 fn bearer(req: &Request) -> Result<Option<String>> {
@@ -165,7 +168,8 @@ async fn login(mut req: Request, env: Env) -> Result<Response> {
         .bind(&binding_values(&[&login]))?
         .first::<UserWithPassword>(None)
         .await?;
-    let Some(user) = user.filter(|user| verify_password(&input.password, &user.password_hash)) else {
+    let Some(user) = user.filter(|user| verify_password(&input.password, &user.password_hash))
+    else {
         return api_error("invalid credentials", 401);
     };
     json(&create_session(&env, user.public()).await?, 200)
@@ -181,7 +185,9 @@ async fn logout(req: Request, env: Env) -> Result<Response> {
         .bind(&binding_values(&[&digest]))?
         .run()
         .await?;
-    env.kv("CACHE")?.delete(&format!("session:{digest}")).await?;
+    env.kv("CACHE")?
+        .delete(&format!("session:{digest}"))
+        .await?;
     Response::empty().map(|response| response.with_status(204))
 }
 
@@ -198,7 +204,12 @@ async fn list_categories(env: Env) -> Result<Response> {
         .prepare("SELECT id, name, slug, created_at FROM categories ORDER BY name")
         .all()
         .await?;
-    json(&ListResponse { items: result.results::<Category>()? }, 200)
+    json(
+        &ListResponse {
+            items: result.results::<Category>()?,
+        },
+        200,
+    )
 }
 
 async fn create_category(mut req: Request, env: Env) -> Result<Response> {
@@ -242,7 +253,12 @@ async fn list_topics(env: Env) -> Result<Response> {
         )
         .all()
         .await?;
-    json(&ListResponse { items: result.results::<Topic>()? }, 200)
+    json(
+        &ListResponse {
+            items: result.results::<Topic>()?,
+        },
+        200,
+    )
 }
 
 async fn create_topic(mut req: Request, env: Env) -> Result<Response> {
@@ -352,15 +368,25 @@ async fn create_post(id: &str, mut req: Request, env: Env) -> Result<Response> {
 #[event(fetch, respond_with_errors)]
 pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     Router::new()
-        .get("/api/v1/health", |_, _| json(&serde_json::json!({ "status": "ok" }), 200))
-        .post_async("/api/v1/auth/register", |req, ctx| register(req, ctx.env).await)
+        .get("/api/v1/health", |_, _| {
+            json(&serde_json::json!({ "status": "ok" }), 200)
+        })
+        .post_async("/api/v1/auth/register", |req, ctx| {
+            register(req, ctx.env).await
+        })
         .post_async("/api/v1/auth/login", |req, ctx| login(req, ctx.env).await)
         .post_async("/api/v1/auth/logout", |req, ctx| logout(req, ctx.env).await)
         .get_async("/api/v1/me", |req, ctx| me(req, ctx.env).await)
-        .get_async("/api/v1/categories", |_, ctx| list_categories(ctx.env).await)
-        .post_async("/api/v1/categories", |req, ctx| create_category(req, ctx.env).await)
+        .get_async("/api/v1/categories", |_, ctx| {
+            list_categories(ctx.env).await
+        })
+        .post_async("/api/v1/categories", |req, ctx| {
+            create_category(req, ctx.env).await
+        })
         .get_async("/api/v1/topics", |_, ctx| list_topics(ctx.env).await)
-        .post_async("/api/v1/topics", |req, ctx| create_topic(req, ctx.env).await)
+        .post_async("/api/v1/topics", |req, ctx| {
+            create_topic(req, ctx.env).await
+        })
         .get_async("/api/v1/topics/:id", |_, ctx| {
             let id = ctx.param("id").cloned().unwrap_or_default();
             async move { topic_detail(&id, ctx.env).await }
@@ -372,4 +398,3 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .run(req, env)
         .await
 }
-

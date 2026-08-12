@@ -1,4 +1,7 @@
-use argon2::{password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString}, Argon2};
+use argon2::{
+    password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString},
+    Argon2,
+};
 use sha2::{Digest, Sha256};
 use uuid::Uuid;
 
@@ -30,9 +33,11 @@ pub fn hash_password(password: &str) -> Result<String, DomainError> {
 }
 
 pub fn verify_password(password: &str, encoded: &str) -> bool {
-    PasswordHash::new(encoded)
-        .ok()
-        .is_some_and(|hash| Argon2::default().verify_password(password.as_bytes(), &hash).is_ok())
+    PasswordHash::new(encoded).ok().is_some_and(|hash| {
+        Argon2::default()
+            .verify_password(password.as_bytes(), &hash)
+            .is_ok()
+    })
 }
 
 #[cfg(test)]
@@ -54,4 +59,3 @@ mod tests {
         assert_ne!(token, token_digest(&token));
     }
 }
-
