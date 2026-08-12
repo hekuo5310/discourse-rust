@@ -88,4 +88,3 @@ pub struct TopicDetail {
 pub struct ApiError<'a> {
     pub error: &'a str,
 }
-
