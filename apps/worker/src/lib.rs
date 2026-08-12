@@ -371,22 +371,14 @@ pub async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .get("/api/v1/health", |_, _| {
             json(&serde_json::json!({ "status": "ok" }), 200)
         })
-        .post_async("/api/v1/auth/register", |req, ctx| {
-            register(req, ctx.env).await
-        })
-        .post_async("/api/v1/auth/login", |req, ctx| login(req, ctx.env).await)
-        .post_async("/api/v1/auth/logout", |req, ctx| logout(req, ctx.env).await)
-        .get_async("/api/v1/me", |req, ctx| me(req, ctx.env).await)
-        .get_async("/api/v1/categories", |_, ctx| {
-            list_categories(ctx.env).await
-        })
-        .post_async("/api/v1/categories", |req, ctx| {
-            create_category(req, ctx.env).await
-        })
-        .get_async("/api/v1/topics", |_, ctx| list_topics(ctx.env).await)
-        .post_async("/api/v1/topics", |req, ctx| {
-            create_topic(req, ctx.env).await
-        })
+        .post_async("/api/v1/auth/register", |req, ctx| register(req, ctx.env))
+        .post_async("/api/v1/auth/login", |req, ctx| login(req, ctx.env))
+        .post_async("/api/v1/auth/logout", |req, ctx| logout(req, ctx.env))
+        .get_async("/api/v1/me", |req, ctx| me(req, ctx.env))
+        .get_async("/api/v1/categories", |_, ctx| list_categories(ctx.env))
+        .post_async("/api/v1/categories", |req, ctx| create_category(req, ctx.env))
+        .get_async("/api/v1/topics", |_, ctx| list_topics(ctx.env))
+        .post_async("/api/v1/topics", |req, ctx| create_topic(req, ctx.env))
         .get_async("/api/v1/topics/:id", |_, ctx| {
             let id = ctx.param("id").cloned().unwrap_or_default();
             async move { topic_detail(&id, ctx.env).await }
