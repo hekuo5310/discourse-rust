@@ -140,13 +140,19 @@ function formatDate(value) {
 function renderCategories() {
   elements.categoryList.replaceChildren();
   elements.allTopicCount.textContent = String(state.topics.length);
-  for (const category of state.categories) {
+  for (const [index, category] of state.categories.entries()) {
     const count = state.topics.filter((topic) => topic.category_id === category.id).length;
     const button = document.createElement("button");
     button.type = "button";
     button.className = "category-item";
     button.dataset.category = category.id;
-    button.append(textElement("span", category.name), textElement("span", String(count)));
+    const label = document.createElement("span");
+    label.className = "category-label";
+    const dot = document.createElement("span");
+    dot.className = "category-dot";
+    dot.dataset.tone = String((index % 4) + 1);
+    label.append(dot, document.createTextNode(category.name));
+    button.append(label, textElement("span", String(count)));
     elements.categoryList.append(button);
   }
   document.querySelectorAll(".category-item").forEach((button) => {
@@ -181,7 +187,7 @@ function renderTopics() {
   elements.topicList.replaceChildren();
 
   const selected = state.categories.find((item) => item.id === state.selectedCategory);
-  elements.topicListTitle.textContent = selected?.name || "全部主题";
+  elements.topicListTitle.textContent = selected?.name || "最新主题";
 
   for (const topic of topics) {
     const row = document.createElement("article");
@@ -190,18 +196,31 @@ function renderTopics() {
     row.setAttribute("role", "link");
     row.dataset.topicId = topic.id;
     const main = document.createElement("div");
-    main.append(
-      textElement("span", categoryName(topic.category_id), "category-pill"),
-      textElement("h3", topic.title)
-    );
+    main.className = "topic-summary";
+    main.append(textElement("h3", topic.title));
     const meta = document.createElement("div");
     meta.className = "topic-row-meta";
-    meta.append(textElement("span", topic.author_username), textElement("span", `更新于${formatDate(topic.updated_at)}`));
+    const avatar = textElement("span", topic.author_username.slice(0, 1), "mini-avatar");
+    avatar.setAttribute("aria-hidden", "true");
+    meta.append(
+      avatar,
+      textElement("span", topic.author_username, "topic-author"),
+      textElement("span", categoryName(topic.category_id), "category-pill")
+    );
     main.append(meta);
     const replies = document.createElement("div");
-    replies.className = "reply-count";
-    replies.append(textElement("strong", String(Math.max(0, topic.post_count - 1))), document.createTextNode("回复"));
-    row.append(main, replies);
+    replies.className = "topic-stat reply-count";
+    replies.append(
+      textElement("strong", String(Math.max(0, topic.post_count - 1))),
+      textElement("span", "回复")
+    );
+    const activity = document.createElement("div");
+    activity.className = "topic-stat activity-time";
+    activity.append(
+      textElement("strong", formatDate(topic.updated_at)),
+      textElement("span", "活动")
+    );
+    row.append(main, replies, activity);
     elements.topicList.append(row);
   }
 }
@@ -247,7 +266,7 @@ async function showTopic(id) {
     elements.topicCategory.textContent = categoryName(detail.topic.category_id);
     elements.topicMeta.textContent = `${detail.topic.author_username} 发起 · ${formatDate(detail.topic.created_at)} · ${detail.posts.length} 条内容`;
     renderPosts(detail.posts);
-    document.title = `${detail.topic.title} · Forum Engine`;
+    document.title = `${detail.topic.title} · 社区论坛`;
   } catch (error) {
     showNotice(error.message);
     location.hash = "#/";
@@ -345,7 +364,7 @@ function route() {
   const current = currentRoute();
   if (current.name === "topic") showTopic(current.id);
   else {
-    document.title = "Forum Engine";
+    document.title = "社区论坛";
     showHome();
   }
 }
