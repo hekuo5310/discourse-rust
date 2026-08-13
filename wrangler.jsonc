@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "forum-engine",
+  "name": "discourse-rust",
   "main": "apps/worker/build/worker/shim.mjs",
   "compatibility_date": "2026-08-12",
   "compatibility_flags": ["nodejs_compat"],
