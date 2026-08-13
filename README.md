@@ -33,6 +33,9 @@ Rust 始终是主要实现语言。只有在确有收益时，其他语言才通
 数据库和 KV 命名空间、执行 D1 迁移、构建 Rust WebAssembly Worker，并配置
 Workers Builds 以便后续提交自动部署。
 
+Cloudflare 的构建镜像未预装 Rust；仓库的统一构建脚本会在首次构建时安装最小化
+Rust 工具链，随后生成 Worker Wasm。无需手动保留默认的 Hello World 代码。
+
 一键部署使用 Workers + D1 + KV。原有 PostgreSQL + Redis 部署选项仍由下方的
 原生运行时提供。
 

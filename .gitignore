@@ -2,7 +2,7 @@
 /build/
 /node_modules/
 /.wrangler/
+/.build-cache/
 .dev.vars
 .env
 *.log
-

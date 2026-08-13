@@ -37,6 +37,10 @@ will use `wrangler.jsonc` to provision D1 and KV automatically, apply the D1
 migrations, build the Rust WebAssembly Worker, and configure Workers Builds for
 automatic deployments from later commits.
 
+Cloudflare's build image does not preinstall Rust. The shared build script
+installs the minimal Rust toolchain on the first build and then generates the
+Worker Wasm; the default Hello World code does not need to be kept manually.
+
 The one-click path uses Workers + D1 + KV. The original PostgreSQL + Redis
 option remains available through the native runtime below.
 
